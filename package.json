@@ -10,6 +10,7 @@
     "bcoin": "^1.0.0-beta.15",
     "bitcoinjs-lib": "^3.3.2",
     "scrypt": "^6.0.3",
-    "unorm": "^1.4.1"
+    "unorm": "^1.4.1",
+    "bitcoinjs-lib": "^3.3.2"
   }
 }
