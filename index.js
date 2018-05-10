@@ -10,6 +10,7 @@ const paramsPerVersion = [
 ];
 
 (async () => {
+  return;
   const salt = 'hello';
   // const { privKey, mnemonic } = await generate(0, salt);
   const mnemonic = 'illegal picture write warfare title owner truck scale';
