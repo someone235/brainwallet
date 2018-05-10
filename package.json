@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "scrypt": "^6.0.3"
+    "scrypt": "^6.0.3",
+    "unorm": "^1.4.1"
   }
 }
