@@ -30,7 +30,7 @@ const paramsPerVersion = [
 async function generate(version, salt, numberOfWords = 6) {
   const versionBuffer = Buffer.from([version]);
   const entropy = crypto.randomBytes(Math.ceil(numberOfWords * 11 / 8 - 1));
-  const mnemonic = entropyToMnemonic(entropy, versionBuffer);
+  const mnemonic = entropyToMnemonic(entropy, numberOfWords, versionBuffer);
   const privKey = await getPrivateKey(entropy, salt, version);
   return { privKey, mnemonic };
 }
