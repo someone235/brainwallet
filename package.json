@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "scrypt": "^6.0.3",
-    "unorm": "^1.4.1"
+    "unorm": "^1.4.1",
+    "bitcoinjs-lib": "^3.3.2"
   }
 }
