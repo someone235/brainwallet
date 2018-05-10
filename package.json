@@ -1,4 +1,10 @@
 {
+  "name": "brainwallet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:someone235/brainwallet.git",
+  "author": "Ori Newman <orinewman1@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "bclient": "^0.0.2",
     "bcoin": "^1.0.0-beta.15",
