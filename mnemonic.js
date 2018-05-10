@@ -140,21 +140,48 @@ function entropyToMnemonic(entropy, wordlist) {
   return wordlist === JAPANESE_WORDLIST ? words.join('\u3000') : words.join(' ')
 }
 
-function entropyToMnemonic2(entropy, versionByte) {
+function entropyToMnemonic2(entropy,numOfWords, versionByte) {
   if (!Buffer.isBuffer(entropy)) entropy = Buffer.from(entropy, 'hex')
-  if (!Buffer.isBuffer(versionByte)) versionByte = Buffer.from(versionByte, 'hex')
-  entropy = Buffer.concat([entropy, versionByte], entropy.length + versionByte.length);
+
 
   wordlist = DEFAULT_WORDLIST
+  const requiredNumOfWords = 11* numOfWords-8;
+ // console.log(requiredNumOfWords)
+  //console.log(entropy.length*8 )
+  if((entropy.length*8) < requiredNumOfWords) {throw new TypeError(INVALID_ENTROPY);}
 
+  var tmp;
+
+  while(entropy.length*8 > requiredNumOfWords)
+  {
+  //  console.log(entropy)
+    tmp = entropy;
+    entropy = entropy.slice(0,entropy.length-1);
+   
+  }
+  //console.log(tmp.length*8)
+
+  entropy = tmp;
+  entropy = bytesToBinary([].slice.call(entropy));
+
+  entropy = entropy.substring(0,entropy.length -(entropy.length) % requiredNumOfWords);
+
+
+
+  //console.log(entropy.length -(entropy.length) % requiredNumOfWords)
+  //if (!Buffer.isBuffer(entropy)) entropy = Buffer.from(entropy, 'hex')
+  if (!Buffer.isBuffer(versionByte)) versionByte = Buffer.from(versionByte, 'hex')
+  //entropy = Buffer.concat([entropy, versionByte], entropy.length + versionByte.length);
   //TODO: add more restrictions to catch bad input
-  if (entropy.length > 32) throw new TypeError(INVALID_ENTROPY)
+  //if (entropy.length > 32) throw new TypeError(INVALID_ENTROPY)
   // if (entropy.length % 4 !== 0) throw new TypeError(INVALID_ENTROPY)
 
-  var entropyBits = bytesToBinary([].slice.call(entropy))
-
-
-  var bits = entropyBits
+  var versionBits = bytesToBinary([].slice.call(versionByte))
+ // console.log(versionBits)
+//console.log(entropyBits)
+//console.log(binaryToByte(entropyBits).toString(16))
+  var bits = entropy + versionBits;
+ // console.log(bits)
   var chunks = bits.match(/(.{1,11})/g)
   var words = chunks.map(function (binary) {
     var index = binaryToByte(binary)
@@ -182,7 +209,7 @@ function validateMnemonic(mnemonic, wordlist) {
   return true
 }
 
-// console.log("dic: " + entropyToMnemonic2('aaaaaaaaaaaaaaaaaaaa', 'aa'))
+ console.log("dic: " + entropyToMnemonic2('aaaaaaaaaaaaaaaaa',5, '00'))
 // console.log("entropy: " + mnemonicToEntropy2('primary fetch primary fetch primary fetch primary fetch'))
 module.exports = {
   entropyToMnemonic: entropyToMnemonic2,
