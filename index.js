@@ -2,6 +2,7 @@ const scrypt = require('scrypt');
 const crypto = require('crypto');
 const bitcoin = require('bitcoinjs-lib');
 const { entropyToMnemonic, mnemonicToEntropy } = require('./mnemonic');
+const toBech32 = require('./toBech32');
 
 const paramsPerVersion = [
   { "N": 1024, "r": 8, "p": 16 },
@@ -26,9 +27,9 @@ const paramsPerVersion = [
   }
 })();
 
-async function generate(version, salt) {
+async function generate(version, salt, numberOfWords = 6) {
   const versionBuffer = Buffer.from([version]);
-  const entropy = crypto.randomBytes(10);
+  const entropy = crypto.randomBytes(Math.ceil(numberOfWords * 11 / 8 - 1));
   const mnemonic = entropyToMnemonic(entropy, versionBuffer);
   const privKey = await getPrivateKey(entropy, salt, version);
   return { privKey, mnemonic };
@@ -61,4 +62,5 @@ function getScryptParams(version) {
 module.exports = {
   generate,
   generateFromMnemonic,
+  toBech32,
 };
