@@ -151,12 +151,13 @@ function entropyToMnemonic2(entropy,numOfWords, versionByte) {
   if((entropy.length*8) < requiredNumOfWords) {throw new TypeError(INVALID_ENTROPY);}
 
   var tmp;
-
+    tmp = entropy;
   while(entropy.length*8 > requiredNumOfWords)
   {
   //  console.log(entropy)
-    tmp = entropy;
+        tmp = entropy;
     entropy = entropy.slice(0,entropy.length-1);
+
    
   }
   //console.log(tmp.length*8)
@@ -209,7 +210,7 @@ function validateMnemonic(mnemonic, wordlist) {
   return true
 }
 
- console.log("dic: " + entropyToMnemonic2('aaaaaaaaaaaaaaaaa',5, '00'))
+ console.log("dic: " + entropyToMnemonic2('aaaaaaaaaaaaaaaaaaaa',8, '00'))
 // console.log("entropy: " + mnemonicToEntropy2('primary fetch primary fetch primary fetch primary fetch'))
 module.exports = {
   entropyToMnemonic: entropyToMnemonic2,
