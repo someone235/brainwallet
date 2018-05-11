@@ -3,6 +3,10 @@ const crypto = require('crypto');
 const bitcoin = require('bitcoinjs-lib');
 const { entropyToMnemonic, mnemonicToEntropy } = require('./mnemonic');
 const toBech32 = require('./toBech32');
+const WORD_BIT_SIZE = require('./word-bit-size');
+const uniqueBy = require('unique-by');
+const wordList = require('./brain-words.json');
+var flatten = require('array-flatten');
 
 // const paramsPerVersion = [
 //   // { "N": 4194304, "r": 6, "p": 4 },
@@ -12,18 +16,47 @@ const toBech32 = require('./toBech32');
 // ];
 
 const paramsPerVersion = [
-  { "N": 32, "r": 8, "p": 1 },//100ms
+  // { "N": 32, "r": 8, "p": 1 },//100ms
   { "N": 1048576, "r": 8, "p": 1 },//4s
   { "N": 4194304, "r": 6, "p": 4 },//30s
+  { "N": 4194304, "r": 600, "p": 4 },//1h
 ];
 
 (async () => {
-  return;
+  // const words = wordList.filter((word, i) => {
+  //   return wordList.findIndex(w => {
+  //     const fourLetters = word.slice(0, 4);
+  //     return word.length >= 4 ? w.indexOf(fourLetters) === 0 : w === word;
+  //   }) === i;
+  // });
+  // const words = uniqueBy(wordList, word => {
+  //   if (word.length < 4) {
+  //     debugger;
+  //   }
+  //   const subword = word.slice(0, 4);
+  //   return subword.length > 3 ? subword : (subword + ' ');
+  // });
+  // const nonUnique = words.map((word, i) => {
+  //   const fourLetters = word.slice(0, 4);
+  //   return words.filter((w, j) => {
+  //     if (i !== j) {
+  //       return word.length >= 4 ? w.indexOf(fourLetters) === 0 : w === word;
+  //     }
+  //   });
+  // });
+  // console.log(JSON.stringify(words.slice(0, 512)));
+  // return;
   // console.log(await getPrivateKey(Buffer.from('231f29723597822810', 'hex'), 'hello', 1));
-  const salt = 'hello';
+  const salt = 'orinewman1@gmail.com';
+  const versionBuffer = Buffer.from([0]);
+  console.log(Array(100).fill('').map(() => {
+    const entropy = crypto.randomBytes(Math.ceil(6 * WORD_BIT_SIZE / 8 - 1));
+    return entropyToMnemonic(entropy, 6, versionBuffer);
+  }));
+  return;
   // const { privKey, mnemonic } = await generate(2, salt, 8);
   // console.log(mnemonic);
-  const mnemonic = 'search butter because birth fitness thank gloom able';
+  const mnemonic = 'census runway hip exile dice divorce';
   const privKey = await generateFromMnemonic(mnemonic, salt);
   console.log(privKey);
   // var m = bitcoin.HDNode.fromSeedBuffer(privKey);
@@ -39,7 +72,7 @@ const paramsPerVersion = [
 
 async function generate(version, salt, numberOfWords = 6) {
   const versionBuffer = Buffer.from([version]);
-  const entropy = crypto.randomBytes(Math.ceil(numberOfWords * 11 / 8 - 1));
+  const entropy = crypto.randomBytes(Math.ceil(numberOfWords * WORD_BIT_SIZE / 8 - 1));
   console.log('entropy', entropy.toString('hex'));
   console.log('salt', salt);
   const mnemonic = entropyToMnemonic(entropy, numberOfWords, versionBuffer);
@@ -80,4 +113,5 @@ module.exports = {
   generate,
   generateFromMnemonic,
   toBech32,
+  mnemonicToEntropy,
 };

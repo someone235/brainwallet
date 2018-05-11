@@ -4,7 +4,8 @@
 //var randomBytes = require('randombytes')
 
 // use unorm until String.prototype.normalize gets better browser support
-var unorm = require('unorm')
+var unorm = require('unorm');
+var WORD_BIT_SIZE = require('./word-bit-size');
 
 
 var ENGLISH_WORDLIST = require('./wordlists/english.json')
@@ -65,7 +66,7 @@ function mnemonicToEntropy(mnemonic, wordlist) {
     var index = wordlist.indexOf(word)
     if (index === -1) throw new Error(INVALID_MNEMONIC)
 
-    return lpad(index.toString(2), '0', 11)
+    return lpad(index.toString(2), '0', WORD_BIT_SIZE)
   }).join('')
 
   // split the binary string into ENT/CS
@@ -98,11 +99,11 @@ function mnemonicToEntropy2(mnemonic, wordlist) {
     var index = wordlist.indexOf(word)
     if (index === -1) throw new Error(INVALID_MNEMONIC)
 
-    return lpad(index.toString(2), '0', 11)
+    return lpad(index.toString(2), '0', WORD_BIT_SIZE)
   }).join('')
-
+  console.log(bits)
   // split the binary string into ENT/CS
-  var dividerIndex = Math.floor(bits.length / 11) * 10
+  var dividerIndex = Math.floor(bits.length / WORD_BIT_SIZE) * 10
   var entropyBits = bits.slice(0, dividerIndex)
   var versionByte = bits.slice(dividerIndex)
 
@@ -112,9 +113,69 @@ function mnemonicToEntropy2(mnemonic, wordlist) {
 
   var entropy = Buffer.from(entropyBytes)
   var version = Buffer.from(versionByte)
-  //TODO: output both version and entropy
-  return { entropy, version };
+  console.log(entropy)
+  console.log(version)
+  return {
+    entropy: entropy,
+    version: version
+
+  };
+
   //return {entropy.toString('hex'),version.toString('hex')}
+}
+
+
+
+
+function entropyToMnemonic2(entropy, numOfWords, versionByte) {
+  if (!Buffer.isBuffer(entropy)) entropy = Buffer.from(entropy, 'hex')
+
+
+  wordlist = DEFAULT_WORDLIST
+  const requiredNumOfWords = WORD_BIT_SIZE * numOfWords - 8;
+  // console.log(requiredNumOfWords)
+  //console.log(entropy.length*8 )
+  if ((entropy.length * 8) < requiredNumOfWords) { throw new TypeError(INVALID_ENTROPY); }
+
+  var tmp;
+  tmp = entropy;
+  while (entropy.length * 8 > requiredNumOfWords) {
+    //  console.log(entropy)
+    tmp = entropy;
+    entropy = entropy.slice(0, entropy.length - 1);
+
+
+  }
+  //console.log(tmp.length*8)
+
+  entropy = tmp;
+  entropy = bytesToBinary([].slice.call(entropy));
+
+  entropy = entropy.substring(0, entropy.length - (entropy.length) % requiredNumOfWords);
+
+
+
+  //console.log(entropy.length -(entropy.length) % requiredNumOfWords)
+  //if (!Buffer.isBuffer(entropy)) entropy = Buffer.from(entropy, 'hex')
+  if (!Buffer.isBuffer(versionByte)) versionByte = Buffer.from(versionByte, 'hex')
+  //entropy = Buffer.concat([entropy, versionByte], entropy.length + versionByte.length);
+  //TODO: add more restrictions to catch bad input
+  //if (entropy.length > 32) throw new TypeError(INVALID_ENTROPY)
+  // if (entropy.length % 4 !== 0) throw new TypeError(INVALID_ENTROPY)
+
+  var versionBits = bytesToBinary([].slice.call(versionByte))
+  // console.log(versionBits)
+  //console.log(entropyBits)
+  //console.log(binaryToByte(entropyBits).toString(16))
+  var bits = entropy + versionBits;
+  console.log(bits)
+  var chunks = bits.match(/(.{1,9})/g)
+  var words = chunks.map(function (binary) {
+    var index = binaryToByte(binary)
+    return wordlist[index]
+  })
+
+  return wordlist === JAPANESE_WORDLIST ? words.join('\u3000') : words.join(' ')
 }
 
 
@@ -131,59 +192,7 @@ function entropyToMnemonic(entropy, wordlist) {
   var checksumBits = deriveChecksumBits(entropy)
 
   var bits = entropyBits + checksumBits
-  var chunks = bits.match(/(.{1,11})/g)
-  var words = chunks.map(function (binary) {
-    var index = binaryToByte(binary)
-    return wordlist[index]
-  })
-
-  return wordlist === JAPANESE_WORDLIST ? words.join('\u3000') : words.join(' ')
-}
-
-function entropyToMnemonic2(entropy,numOfWords, versionByte) {
-  if (!Buffer.isBuffer(entropy)) entropy = Buffer.from(entropy, 'hex')
-
-
-  wordlist = DEFAULT_WORDLIST
-  const requiredNumOfWords = 11* numOfWords-8;
- // console.log(requiredNumOfWords)
-  //console.log(entropy.length*8 )
-  if((entropy.length*8) < requiredNumOfWords) {throw new TypeError(INVALID_ENTROPY);}
-
-  var tmp;
-    tmp = entropy;
-  while(entropy.length*8 > requiredNumOfWords)
-  {
-  //  console.log(entropy)
-        tmp = entropy;
-    entropy = entropy.slice(0,entropy.length-1);
-
-   
-  }
-  //console.log(tmp.length*8)
-
-  entropy = tmp;
-  entropy = bytesToBinary([].slice.call(entropy));
-
-  entropy = entropy.substring(0,entropy.length -(entropy.length) % requiredNumOfWords);
-
-
-
-  //console.log(entropy.length -(entropy.length) % requiredNumOfWords)
-  //if (!Buffer.isBuffer(entropy)) entropy = Buffer.from(entropy, 'hex')
-  if (!Buffer.isBuffer(versionByte)) versionByte = Buffer.from(versionByte, 'hex')
-  //entropy = Buffer.concat([entropy, versionByte], entropy.length + versionByte.length);
-  //TODO: add more restrictions to catch bad input
-  //if (entropy.length > 32) throw new TypeError(INVALID_ENTROPY)
-  // if (entropy.length % 4 !== 0) throw new TypeError(INVALID_ENTROPY)
-
-  var versionBits = bytesToBinary([].slice.call(versionByte))
- // console.log(versionBits)
-//console.log(entropyBits)
-//console.log(binaryToByte(entropyBits).toString(16))
-  var bits = entropy + versionBits;
- // console.log(bits)
-  var chunks = bits.match(/(.{1,11})/g)
+  var chunks = bits.match(/(.{1,9})/g)
   var words = chunks.map(function (binary) {
     var index = binaryToByte(binary)
     return wordlist[index]
@@ -210,8 +219,10 @@ function validateMnemonic(mnemonic, wordlist) {
   return true
 }
 
- console.log("dic: " + entropyToMnemonic2('aaaaaaaaaaaaaaaaaaaa',8, '00'))
-// console.log("entropy: " + mnemonicToEntropy2('primary fetch primary fetch primary fetch primary fetch'))
+//console.log("dic: " + entropyToMnemonic2('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',7, '00'))
+// var tmp = mnemonicToEntropy2('primary fetch primary fetch primary fetch parade');
+// console.log("entropy: " + tmp.entropy )
+//  console.log("version: " + tmp.version )
 module.exports = {
   entropyToMnemonic: entropyToMnemonic2,
   mnemonicToEntropy: mnemonicToEntropy2,
