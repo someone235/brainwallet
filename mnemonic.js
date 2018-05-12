@@ -103,7 +103,7 @@ function mnemonicToEntropy2(mnemonic, wordlist) {
   }).join('')
   console.log(bits)
   // split the binary string into ENT/CS
-  var dividerIndex = Math.floor(bits.length / WORD_BIT_SIZE) * 10
+  var dividerIndex = Math.floor(bits.length / WORD_BIT_SIZE) * (WORD_BIT_SIZE - 1);
   var entropyBits = bits.slice(0, dividerIndex)
   var versionByte = bits.slice(dividerIndex)
 
@@ -169,7 +169,7 @@ function entropyToMnemonic2(entropy, numOfWords, versionByte) {
   //console.log(binaryToByte(entropyBits).toString(16))
   var bits = entropy + versionBits;
   console.log(bits)
-  var chunks = bits.match(/(.{1,9})/g)
+  var chunks = bits.match(/(.{1,10})/g)
   var words = chunks.map(function (binary) {
     var index = binaryToByte(binary)
     return wordlist[index]
@@ -192,7 +192,7 @@ function entropyToMnemonic(entropy, wordlist) {
   var checksumBits = deriveChecksumBits(entropy)
 
   var bits = entropyBits + checksumBits
-  var chunks = bits.match(/(.{1,9})/g)
+  var chunks = bits.match(/(.{1,10})/g)
   var words = chunks.map(function (binary) {
     var index = binaryToByte(binary)
     return wordlist[index]
