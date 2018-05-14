@@ -4,9 +4,9 @@ const bitcoin = require('bitcoinjs-lib');
 const { entropyToMnemonic, mnemonicToEntropy } = require('./mnemonic');
 const toBech32 = require('./toBech32');
 const WORD_BIT_SIZE = require('./word-bit-size');
-const uniqueBy = require('unique-by');
-const wordList = require('./brain-words.json');
-var flatten = require('array-flatten');
+// const uniqueBy = require('unique-by');
+// const wordList = require('./brain-words.json');
+// var flatten = require('array-flatten');
 
 // const paramsPerVersion = [
 //   // { "N": 4194304, "r": 6, "p": 4 },
