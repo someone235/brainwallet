@@ -7,8 +7,6 @@
   "license": "MIT",
   "dependencies": {
     "array-flatten": "^2.1.1",
-    "bclient": "^0.0.2",
-    "bcoin": "^1.0.0-beta.15",
     "bitcoinjs-lib": "^3.3.2",
     "scrypt": "^6.0.3",
     "unique-by": "^1.0.0",
